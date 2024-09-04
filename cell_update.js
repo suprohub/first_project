@@ -26,7 +26,10 @@
             method: "POST"
         }).then(async response => {
             var data = (await response.text()).split(" ")
-            if (data[0] != -1 && last_data != data[0]) {
+            if (data[1] == -2) {
+                const text = document.getElementById("win");
+                text.innerHTML = `Выйграл игрок номер ${data[0]}`
+            } else if (data[0] != -1 && last_data != data[0]) {
                 const button = document.getElementById(`b${data[0]}`)
                 button.setAttribute("disabled", true)
                 button.innerHTML = data[1]

@@ -1,8 +1,9 @@
 
 import * as http from 'node:http'
 import * as fs from 'node:fs'
+import { exit } from 'node:process';
 
-const buttons_table = `<script>${fs.readFileSync("cell_update.js")}</script>` + generate_table();
+const buttons_table = `<script>${fs.readFileSync("cell_update.js")}</script>` + generate_table() + `<p1 id="win"></p1>`;
 const field_len = 20;
 var table: Map<number, number> = new Map();
 var last_player = 0;
@@ -33,7 +34,11 @@ const server = http.createServer((req, res) => {
                 if (current_move == 2) {
                     current_move = 0
                 }
-                console.log(win_check(ids[0]))
+                var check = win_check(ids[0]);
+                if (!Number.isNaN(check)) {
+                    sync_data = check
+                    current_move = -1
+                }
             } else {
                 console.log(`cheater is ${req.socket.remoteAddress}`)
             }
