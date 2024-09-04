@@ -19,32 +19,37 @@ document.addEventListener("click", (mouse_event) => {
 })
 var last_data = "";
 
-for (loop=true ; loop ; ) {
-    fetch(`${window.location.href}cell_sync`, {
-        method: "POST"
-    }).then(response => {
-        response.text.then((data) => {
-            data = data.split(" ")
-            
-            if (data[1] == -2) {
-                const text = document.getElementById("win");
-                text.innerHTML = `Выйграл игрок номер ${data[0]}`
-                loop = false
-            } else if (data[0] != -1 && last_data != data[0]) {
-                const button = document.getElementById(`b${data[0]}`)
-                button.setAttribute("disabled", true)
-                button.innerHTML = data[1]
-                last_data = data[0]
-                console.log(data[1], player_id, (player_id === 0)? 1 : player_id - 1)
-                if (data[1] == (player_id === 0)? 1 : player_id - 1) {
-                    move = true
+sync()
+
+
+function sync() {
+    setTimeout(() => {
+        fetch(`${window.location.href}cell_sync`, {
+            method: "POST"
+        }).then(response => {
+            response.text().then((data) => {
+                data = data.split(" ")
+                
+                if (data[1] == -2) {
+                    const text = document.getElementById("win");
+                    text.innerHTML = `Выйграл игрок номер ${data[0]}`
+                    loop = false
+                } else if (data[0] != -1 && last_data != data[0]) {
+                    const button = document.getElementById(`b${data[0]}`)
+                    button.setAttribute("disabled", true)
+                    button.innerHTML = data[1]
+                    last_data = data[0]
+                    console.log(data[1], player_id, (player_id === 0)? 1 : player_id - 1)
+                    if (data[1] == (player_id === 0)? 1 : player_id - 1) {
+                        move = true
+                    }
                 }
-            }
+            })
         })
-    })
-    
-    await sleep(100)
-}  
+        sync()
+    }, 0)
+}
+
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

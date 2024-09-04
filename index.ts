@@ -121,6 +121,7 @@ function generate_table(): string {
 }
 
 function receive_data(req, callback: (data: string) => void) {
+	console.log("receive")
     var data = "";
     req.on("data", (chunk) => {
         data += chunk.toString();
