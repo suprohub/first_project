@@ -3,7 +3,7 @@ import * as http from 'node:http'
 import * as fs from 'node:fs'
 import { exit } from 'node:process';
 
-const buttons_table = `<script>${fs.readFileSync("cell_update.js")}</script>` + generate_table() + `<p1 id="win"></p1>`;
+const buttons_table = `<!DOCTYPE html><meta charset="UTF-8"><script>${fs.readFileSync("cell_update.js")}</script>` + generate_table() + `<p1 id="win"></p1>`;
 const field_len = 20;
 var table: Map<number, number> = new Map();
 var last_player = 0;
