@@ -1,11 +1,11 @@
 import * as http from "node:http";
 import * as fs from "node:fs";
 
+const field_len = 20;
 const game =
 	`<!DOCTYPE html><meta charset="UTF-8"><script>${fs.readFileSync("cell_update.js")}</script>` +
 	generate_table() +
 	`<p1 id="win"></p1>`;
-var field_len = 20;
 var table: Map<number, number> = new Map();
 var last_player = 0;
 var current_move = 0;
@@ -43,7 +43,6 @@ const server = http.createServer((req, res) => {
 				break;
 			}
 			case "/cell_sync": {
-                console.log("sync")
 				var old_move = current_move - 1;
 				if (old_move == -1) {
 					old_move = 1;
@@ -54,12 +53,10 @@ const server = http.createServer((req, res) => {
 	} else {
 		switch (req.url) {
 			case "/": {
-                var local_game = game.replace("'constant_player_id'", last_player.toString());
-                console.log(local_game)
-                console.log(`new player ${last_player}`);
-				last_player++;
 				res.writeHead(200, { "Content-Type": "text/html" });
-				res.end(local_game);
+				res.end(game.replace("'constant_player_id'", last_player.toString()));
+				console.log(`new player ${last_player}`);
+				last_player++;
 				break;
 			}
 		}
@@ -110,8 +107,7 @@ function check_direction(
 }
 
 function generate_table(): string {
-	var table = ""
-    var row = ""
+	var [table, row] = ["", ""];
 	var cell_id = 0;
 	for (var row_id = 0; row_id < field_len; row_id++) {
 		for (var col_id = 0; col_id < field_len; col_id++) {
@@ -121,7 +117,6 @@ function generate_table(): string {
 		table += `<tr>${row}</tr>`;
         row = "";
 	}
-    console.log(table, `<tr>${row}</tr>`)
 	return `<table><tbody>${table}</tbody>\n</table>`;
 }
 
