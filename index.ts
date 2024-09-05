@@ -2,6 +2,11 @@ import * as http from "node:http";
 import * as fs from "node:fs";
 
 const field_len = 20;
+const table: Map<number, number> = new Map();
+let last_player = 0;
+let current_move = 0;
+let sync_data = -1;
+
 
 const check_direction = (
 	first_cell: number,
@@ -19,7 +24,6 @@ const check_direction = (
 	}
 	for (let i = 0; i < last_player; i++) {
 		if (values.every((value) => value == i)) {
-			console.log("win");
 			return i;
 		}
 	}
@@ -36,6 +40,7 @@ const is_win = (cell_id: number): number => {
 		check_direction(cell_id, 1, -1) ||
 		check_direction(cell_id, -1, 1) ||
 		check_direction(cell_id, -1, -1);
+	console.log(value, "a", check_direction)
 	if (!Number.isNaN(value)) {
 		return value;
 	}
@@ -71,10 +76,6 @@ const game =
 	`<!DOCTYPE html><meta charset="UTF-8"><script>${fs.readFileSync("cell_update.js")}</script>` +
 	generate_table() +
 	`<p1 id="win"></p1>`;
-let table: Map<number, number> = new Map();
-let last_player = 0;
-let current_move = 0;
-let sync_data = -1;
 
 // Creating server
 const server = http.createServer((req, res) => {
@@ -97,7 +98,9 @@ const server = http.createServer((req, res) => {
                             current_move = 0;
                         }
                         let check = is_win(ids[0]);
+						console.log(check)
                         if (!Number.isNaN(check)) {
+							console.log("win")
                             sync_data = check;
                             current_move = -1;
                         }
