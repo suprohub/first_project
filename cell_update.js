@@ -40,8 +40,8 @@ setTimeout(function sync() {
                     move = true
                 }
             }
+            setTimeout(sync, 100)
         })
-        setTimeout(sync, 100)
     })
 }, 100)
 
