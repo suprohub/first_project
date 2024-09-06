@@ -1,8 +1,10 @@
 import * as http from "node:http";
 import * as fs from "node:fs";
+import { randomBytes } from "node:crypto";
 
 const field_len = 20;
 const table: Map<number, number> = new Map();
+const passwords: Map<number, string> = new Map();
 let last_player = 0;
 let current_move = 0;
 let sync_data = -1;
@@ -36,14 +38,17 @@ const check_direction = (
 	x_add: number,
 	y_add: number,
 ): number | null => {
-	const first_check = check_direction_len(first_cell, x_add, y_add, 4);
-	// 0 this 0 0
-	const special_check_left = [check_direction_len(first_cell, -x_add, -y_add, 2), check_direction_len(first_cell, x_add, y_add, 3)];
-	// 0 0 this 0
-	const special_check_right = [check_direction_len(first_cell, -x_add, -y_add, 3), check_direction_len(first_cell, x_add, y_add, 2)];
+	const first_check = check_direction_len(first_cell, x_add, y_add, 5);
+	// 0 this 0 0 0
+	const special_check_left = [check_direction_len(first_cell, -x_add, -y_add, 2), check_direction_len(first_cell, x_add, y_add, 4)];
+	// 0 0 this 0 0
+	const special_check_center = [check_direction_len(first_cell, -x_add, -y_add, 3), check_direction_len(first_cell, x_add, y_add, 3)];
+	// 0 0 0 this 0
+	const special_check_right = [check_direction_len(first_cell, -x_add, -y_add, 4), check_direction_len(first_cell, x_add, y_add, 2)];
 
 	return first_check ||
 		   ((special_check_left[0] == special_check_left[1] && special_check_left[0] != null) ? special_check_left[0] : null) ||
+		   ((special_check_center[0] == special_check_center[1] && special_check_center[0] != null) ? special_check_left[0] : null) ||
 		   ((special_check_right[0] == special_check_right[1] && special_check_right[0] != null) ? special_check_right[0] : null)
 }
 
@@ -105,19 +110,17 @@ const server = http.createServer((req, res) => {
                 receive_data(req, (data) => {
                     console.log("POST data:", data);
                     res.end("Data received");
-    
-                    let ids: number[] = data
-                        .replace("b", "")
-                        .split(" ")
-                        .map((val) => Number(val));
-                    if (ids[0] < 400 && !table.has(ids[0]) && current_move == ids[1]) {
-                        table.set(ids[0], ids[1]);
-                        sync_data = ids[0];
+                    let ids = data.split(" ");
+					let button_id = Number(ids[0].replace("b", ""))
+					let player_id = Number(ids[1])
+                    if (button_id < 400 && !table.has(button_id) && current_move == player_id && ids[2] == (passwords.get(player_id) as string)) {
+                        table.set(button_id, player_id);
+                        sync_data = button_id;
                         current_move++;
                         if (current_move == 2) {
                             current_move = 0;
                         }
-                        let check = is_win(ids[0]);
+                        let check = is_win(button_id);
                         if (check != null) {
 							console.log("win")
 							setTimeout(() => {
@@ -142,10 +145,15 @@ const server = http.createServer((req, res) => {
 	} else {
 		switch (req.url) {
 			case "/": {
-				res.writeHead(200, { "Content-Type": "text/html" });
-				res.end(game.replace("'constant_player_id'", last_player.toString()));
-				console.log(`new player ${last_player}`);
-				last_player++;
+				randomBytes(15, (err, buf) => {
+					if (err) throw err;
+					let password = buf.toString("hex");
+					passwords.set(last_player, password);
+					res.writeHead(200, { "Content-Type": "text/html" });
+					res.end(game.replace("'constant_player_id'", last_player.toString()).replace("'password'", `"${password}"`));
+					console.log(`new player ${last_player}`);
+					last_player++;
+				});
 				break;
 			}
 		}

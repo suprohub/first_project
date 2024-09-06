@@ -1,5 +1,6 @@
 
 const player_id = 'constant_player_id';
+const password = 'password'
 let move = (player_id == 0)
 let last_data = "";
 
@@ -12,7 +13,7 @@ document.addEventListener("click", (mouse_event) => {
         if (button_id) {
             fetch(`${window.location.href}cell_update`, {
                 method: "POST",
-                body: `${button_id} ${player_id}`
+                body: `${button_id} ${player_id} ${password}`
             })
             move = false
         }
