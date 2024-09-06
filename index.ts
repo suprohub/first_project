@@ -8,18 +8,19 @@ let current_move = 0;
 let sync_data = -1;
 
 
-const check_direction = (
+const check_direction_len = (
 	first_cell: number,
 	x_add: number,
 	y_add: number,
+	len: number
 ): number | null => {
 	let values: any[] = [];
 	let value: number | undefined;
 	let [x, y] = [0, 0];
-	for (let i = 0; i < 4; i++) {
+	for (let i = 0; i < len; i++) {
 		value = table.get(first_cell + y + x);
-		x += y_add * field_len;
-		y += x_add;
+		y += y_add * field_len;
+		x += x_add;
 		values.push(value);
 	}
 	for (let i = 0; i < last_player; i++) {
@@ -29,6 +30,23 @@ const check_direction = (
 	}
 	return null;
 }
+
+const check_direction = (
+	first_cell: number,
+	x_add: number,
+	y_add: number,
+): number | null => {
+	const first_check = check_direction_len(first_cell, x_add, y_add, 4);
+	// 0 this 0 0
+	const special_check_left = [check_direction_len(first_cell, -x_add, -y_add, 2), check_direction_len(first_cell, x_add, y_add, 3)];
+	// 0 0 this 0
+	const special_check_right = [check_direction_len(first_cell, -x_add, -y_add, 3), check_direction_len(first_cell, x_add, y_add, 2)];
+
+	return first_check ||
+		   ((special_check_left[0] == special_check_left[1] && special_check_left[0] != null) ? special_check_left[0] : null) ||
+		   ((special_check_right[0] == special_check_right[1] && special_check_right[0] != null) ? special_check_right[0] : null)
+}
+
 const is_win = (cell_id: number): number | null => {
 	// null || 0 || null => null
 	// null || 1 || null => 1
@@ -102,8 +120,10 @@ const server = http.createServer((req, res) => {
                         let check = is_win(ids[0]);
                         if (check != null) {
 							console.log("win")
-                            sync_data = check;
-                            current_move = -1;
+							setTimeout(() => {
+								sync_data = check;
+								current_move = -1;
+							}, 150)
                         }
                     } else {
                         console.log(`intresting connection: ${req.socket.remoteAddress}`);
