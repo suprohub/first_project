@@ -30,20 +30,22 @@ const sleep_thread_burn = (ms) => {
 
 const sync = async () => {
     for (;;) {
-        let data = (await (await fetch(`${window.location.href}cell_sync`, { method: "POST" })).text()).split(" ");
+        if (!move) {
+            let data = (await (await fetch(`${window.location.href}cell_sync`, { method: "POST" })).text()).split(" ");
             
-        if (data[1] == -2) {
-            const text = document.getElementById("win");
-            text.innerHTML = `Выйграл игрок номер ${data[0]}`
-            loop = false
-        } else if (data[0] != -1 && last_data != data[0]) {
-            const button = document.getElementById(`b${data[0]}`)
-            button.setAttribute("disabled", true)
-            button.innerHTML = data[1]
-            last_data = data[0]
-            console.log(data[1], player_id, (player_id === 0)? 1 : player_id - 1)
-            if (data[1] == (player_id === 0)? 1 : player_id - 1) {
-                move = true
+            if (data[1] == -2) {
+                const text = document.getElementById("win");
+                text.innerHTML = `Выйграл игрок номер ${data[0]}`
+                loop = false
+            } else if (data[0] != -1 && last_data != data[0]) {
+                const button = document.getElementById(`b${data[0]}`)
+                button.setAttribute("disabled", true)
+                button.innerHTML = data[1]
+                last_data = data[0]
+                console.log(data[1], player_id, (player_id === 0)? 1 : player_id - 1)
+                if (data[1] == (player_id === 0)? 1 : player_id - 1) {
+                    move = true
+                }
             }
         }
 
