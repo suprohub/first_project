@@ -10,9 +10,9 @@ let sync_data = -1;
 
 const check_direction = (
 	first_cell: number,
-	y_add: number,
 	x_add: number,
-): number => {
+	y_add: number,
+): number | null => {
 	let values: any[] = [];
 	let value: number | undefined;
 	let [x, y] = [0, 0];
@@ -24,27 +24,29 @@ const check_direction = (
 	}
 	for (let i = 0; i < last_player; i++) {
 		if (values.every((value) => value == i)) {
-			return i;
+			return i + 1;
 		}
 	}
-	return NaN;
+	return null;
 }
-
-const is_win = (cell_id: number): number => {
-	let value: number =
-		check_direction(cell_id, 0, 1)  ||
-		check_direction(cell_id, 0, -1) ||
+const is_win = (cell_id: number): number | null => {
+	// null || 0 || null => null
+	// null || 1 || null => 1
+	// null | null => 0
+	let value: number | null =
 		check_direction(cell_id, 1, 0)  ||
 		check_direction(cell_id, -1, 0) ||
+		check_direction(cell_id, 0, 1)  ||
+		check_direction(cell_id, 0, -1) ||
 		check_direction(cell_id, 1, 1)  ||
-		check_direction(cell_id, 1, -1) ||
 		check_direction(cell_id, -1, 1) ||
+		check_direction(cell_id, 1, -1) ||
 		check_direction(cell_id, -1, -1);
-	console.log(value, "a", check_direction)
-	if (!Number.isNaN(value)) {
-		return value;
+
+	if (value != null) {
+		return value - 1;
 	}
-	return NaN;
+	return null;
 }
 
 const generate_table = (): string => {
@@ -98,8 +100,7 @@ const server = http.createServer((req, res) => {
                             current_move = 0;
                         }
                         let check = is_win(ids[0]);
-						console.log(check)
-                        if (!Number.isNaN(check)) {
+                        if (check != null) {
 							console.log("win")
                             sync_data = check;
                             current_move = -1;
