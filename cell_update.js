@@ -33,9 +33,9 @@ const sync = async () => {
         if (!move) {
             let data = (await (await fetch(`${window.location.href}cell_sync`, { method: "POST" })).text()).split(" ");
             
-            if (data[1] == -2) {
+            if (data[0] == -2) {
                 const text = document.getElementById("win");
-                text.innerHTML = `Выйграл игрок номер ${data[0]}`
+                text.innerHTML = `Выйграл игрок номер ${data[1]}`
                 loop = false
             } else if (data[0] != -1 && last_data != data[0]) {
                 const button = document.getElementById(`b${data[0]}`)
@@ -43,13 +43,13 @@ const sync = async () => {
                 button.innerHTML = data[1]
                 last_data = data[0]
                 console.log(data[1], player_id, (player_id === 0)? 1 : player_id - 1)
-                if (data[1] == (player_id === 0)? 1 : player_id - 1) {
+                if (data[1] == (player_id == 0)? 1 : 0) {
                     move = true
                 }
             }
         }
 
-        await sleep(100)
+        await sleep(250)
     }
 };
 
