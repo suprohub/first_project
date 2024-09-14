@@ -1,55 +1,7 @@
 import * as http from "node:http";
 import * as fs from "node:fs";
 import { randomBytes } from "node:crypto";
-
-enum Player {
-	First,
-	Second
-}
-
-namespace Player {
-	export const fromNumber = (num: number): Player => {
-		switch (num) {
-			case 0: {
-				return Player.First
-			}
-			case 1: {
-				return Player.Second
-			}
-			default: {
-				throw "canot convert"
-			}
-		}
-	}
-}
-
-// https://github.com/microsoft/TypeScript/issues/36336
-// https://github.com/microsoft/TypeScript/issues/50460
-let last_normal_data = 0;
-enum SyncData {
-	NormalData,
-	GameStart,
-	GameEnd
-}
-
-namespace SyncData {
-	export const toNumber = (variant: SyncData): number => {
-		switch (variant) {
-			case SyncData.NormalData: {
-				return last_normal_data
-			}
-			case SyncData.GameStart: {
-				return -1
-			}
-			case SyncData.GameEnd: {
-				return -2
-			}
-			default: {
-				throw "canot convert"
-			}
-		}
-	}
-}
+import { Player, SyncData, last_normal_data } from "./enums";
 
 const field_len = 20;
 const table: Map<number, Player> = new Map();
@@ -145,7 +97,7 @@ const receive_data = (req: http.IncomingMessage, callback: (data: string) => voi
 }
 
 const game =
-	`<!DOCTYPE html><meta charset="UTF-8"><script>${fs.readFileSync("cell_update.js")}</script>` +
+	`<!DOCTYPE html><meta charset="UTF-8"><script src="enums.js">${fs.readFileSync("lib/enums.js")}</script><script>${fs.readFileSync("lib/cell_update.js")}</script>` +
 	generate_table() +
 	`<p1 id="win"></p1>`;
 
@@ -162,10 +114,7 @@ const server = http.createServer((req, res) => {
 					let player_id = Player.fromNumber(Number(ids[1]))
                     if (button_id < 400 && !table.has(button_id) && current_move == player_id && ids[2] == (passwords.get(player_id) as string)) {
                         table.set(button_id, player_id);
-
-                        last_normal_data = button_id;
-						sync_data = SyncData.NormalData;
-						
+						sync_data = SyncData.fromNumber(button_id);
 						last_move = current_move;
 						if (current_move == Player.First) {
 							current_move = Player.Second
