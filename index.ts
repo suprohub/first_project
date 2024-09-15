@@ -97,7 +97,7 @@ const receive_data = (req: http.IncomingMessage, callback: (data: string) => voi
 }
 
 const game =
-	`<!DOCTYPE html><meta charset="UTF-8"><script src="enums.js">${fs.readFileSync("lib/enums.js")}</script><script>${fs.readFileSync("lib/cell_update.js")}</script>` +
+	`<!DOCTYPE html><meta charset="UTF-8"><script>${fs.readFileSync("lib/enums.js")}</script><script>${fs.readFileSync("lib/cell_update.js")}</script>` +
 	generate_table() +
 	`<p1 id="win"></p1>`;
 
