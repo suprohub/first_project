@@ -13,6 +13,7 @@
     "tsx": "^4.19.0"
   },
   "dependencies": {
+    "common-js": "^0.3.8",
     "node": "^22.7.0"
   }
 }

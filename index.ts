@@ -76,7 +76,7 @@ const generate_table = (): string => {
 	let cell_id = 0;
 	for (let row_id = 0; row_id < field_len; row_id++) {
 		for (let col_id = 0; col_id < field_len; col_id++) {
-			row += `<td> <button type="button" id="b${cell_id}"> &nbsp </button> </td>\n`;
+			row += `<td> <button type="button" id="${cell_id}"> &nbsp </button> </td>\n`;
 			cell_id++;
 		}
 		table += `<tr>${row}</tr>`;
@@ -97,7 +97,7 @@ const receive_data = (req: http.IncomingMessage, callback: (data: string) => voi
 }
 
 const game =
-	`<!DOCTYPE html><meta charset="UTF-8"><script>${fs.readFileSync("lib/enums.js")}</script><script>${fs.readFileSync("lib/cell_update.js")}</script>` +
+	`<!DOCTYPE html><meta charset="UTF-8"><script type="module">${fs.readFileSync("lib/cell_update.js")}</script>` +
 	generate_table() +
 	`<p1 id="win"></p1>`;
 
@@ -110,7 +110,7 @@ const server = http.createServer((req, res) => {
                     console.log("POST data:", data);
                     res.end("Data received");
                     let ids = data.split(" ");
-					let button_id = Number(ids[0].replace("b", ""))
+					let button_id = Number(ids[0])
 					let player_id = Player.fromNumber(Number(ids[1]))
                     if (button_id < 400 && !table.has(button_id) && current_move == player_id && ids[2] == (passwords.get(player_id) as string)) {
                         table.set(button_id, player_id);
@@ -137,7 +137,7 @@ const server = http.createServer((req, res) => {
 				break;
 			}
 			case "/cell_sync": {
-				res.end(`${SyncData.toNumber(sync_data)} ${last_move}`);
+				res.end(`${SyncData.toString(sync_data)} ${last_move}`);
 			}
 		}
 	} else {
@@ -161,6 +161,12 @@ const server = http.createServer((req, res) => {
 						res.end("Люди уже играют")
 					}
 				});
+				break;
+			}
+
+			case "/enums": {
+				res.writeHead(200, { "Content-Type": "text/javascript" });
+				res.end(fs.readFileSync("lib/enums.js"))
 				break;
 			}
 		}

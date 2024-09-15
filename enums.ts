@@ -29,13 +29,31 @@ export enum SyncData {
 }
 
 export namespace SyncData {
+	export const fromString = (str: string): number => {
+		let splitted = str.split(" ", 2);
+		switch (splitted[0]) {
+			case "-2": {
+				last_normal_data = Number(splitted[1]);
+				return SyncData.GameEnd
+			}
+			case "-1": {
+				return SyncData.GameStart
+			}
+			default: {
+				if (Number(splitted[0]) < 0) { throw "canot convert" };
+				last_normal_data = Number(splitted[0]);
+				return SyncData.NormalData;
+			}
+		}
+	}
+
 	export const fromNumber = (num: number): number => {
 		switch (num) {
 			case -2: {
-				return last_normal_data
+				return SyncData.GameEnd
 			}
 			case -1: {
-				return -1
+				return SyncData.GameStart
 			}
 			default: {
 				if (num < 0) { throw "canot convert" };
@@ -45,16 +63,16 @@ export namespace SyncData {
 		}
 	}
 
-	export const toNumber = (variant: SyncData): number => {
+	export const toString = (variant: SyncData): string => {
 		switch (variant) {
 			case SyncData.NormalData: {
-				return last_normal_data
+				return String(last_normal_data)
 			}
 			case SyncData.GameStart: {
-				return -1
+				return String(-1)
 			}
 			case SyncData.GameEnd: {
-				return -2
+				return `-2 ${last_normal_data}`
 			}
 			default: {
 				throw "canot convert"

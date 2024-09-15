@@ -12,8 +12,9 @@ export declare enum SyncData {
     GameEnd = 2
 }
 export declare namespace SyncData {
+    const fromString: (str: string) => number;
     const fromNumber: (num: number) => number;
-    const toNumber: (variant: SyncData) => number;
+    const toString: (variant: SyncData) => string;
     const setLastNormalData: (val: number) => void;
 }
 //# sourceMappingURL=enums.d.ts.map
