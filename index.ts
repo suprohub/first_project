@@ -1,7 +1,7 @@
 import * as http from "node:http";
 import * as fs from "node:fs";
 import { randomBytes } from "node:crypto";
-import { Player, SyncData, last_normal_data } from "./enums";
+import { Player, SyncData } from "./enums";
 
 const field_len = 20;
 const table: Map<number, Player> = new Map();
@@ -10,6 +10,7 @@ let server_full = false;
 let player = Player.First;
 let last_move = Player.First;
 let current_move = Player.First;
+let current_button_id = 0;
 let sync_data = SyncData.GameStart;
 
 
@@ -68,7 +69,7 @@ const is_win = (cell_id: number): Player | null => {
 		check_direction(cell_id, 1, -1) ||
 		check_direction(cell_id, -1, -1);
 
-	return (value != null)? Player.fromNumber(value - 1) : null
+	return (value != null)? value - 1 : null
 }
 
 const generate_table = (): string => {
@@ -111,10 +112,11 @@ const server = http.createServer((req, res) => {
                     res.end("Data received");
                     let ids = data.split(" ");
 					let button_id = Number(ids[0])
-					let player_id = Player.fromNumber(Number(ids[1]))
+					let player_id = Number(ids[1])
                     if (button_id < 400 && !table.has(button_id) && current_move == player_id && ids[2] == (passwords.get(player_id) as string)) {
                         table.set(button_id, player_id);
-						sync_data = SyncData.fromNumber(button_id);
+						sync_data = SyncData.NormalData
+						current_button_id = button_id
 						last_move = current_move;
 						if (current_move == Player.First) {
 							current_move = Player.Second
@@ -137,7 +139,7 @@ const server = http.createServer((req, res) => {
 				break;
 			}
 			case "/cell_sync": {
-				res.end(`${SyncData.toString(sync_data)} ${last_move}`);
+				res.end(`${sync_data} ${last_move} ${current_button_id}`);
 			}
 		}
 	} else {
