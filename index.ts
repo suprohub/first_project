@@ -20,7 +20,7 @@ const check_direction_len = (
 	y_add: number,
 	len: number
 ): number | null => {
-	let values: any[] = [];
+	const values: (Player | undefined)[] = [];
 	let value: Player | undefined;
 	let [x, y] = [0, 0];
 	for (let i = 0; i < len; i++) {
@@ -37,7 +37,7 @@ const check_direction_len = (
 		return 2;
 	}
 	return null;
-}
+};
 
 const check_direction = (
 	first_cell: number,
@@ -55,11 +55,11 @@ const check_direction = (
 	return first_check ||
 		   ((special_check_left[0] == special_check_left[1] && special_check_left[0] != null) ? special_check_left[0] : null) ||
 		   ((special_check_center[0] == special_check_center[1] && special_check_center[0] != null) ? special_check_left[0] : null) ||
-		   ((special_check_right[0] == special_check_right[1] && special_check_right[0] != null) ? special_check_right[0] : null)
-}
+		   ((special_check_right[0] == special_check_right[1] && special_check_right[0] != null) ? special_check_right[0] : null);
+};
 
 const is_win = (cell_id: number): Player | null => {
-	let value: Player | null =
+	const value: Player | null =
 		check_direction(cell_id, 1, 0)  ||
 		check_direction(cell_id, -1, 0) ||
 		check_direction(cell_id, 0, 1)  ||
@@ -69,8 +69,8 @@ const is_win = (cell_id: number): Player | null => {
 		check_direction(cell_id, 1, -1) ||
 		check_direction(cell_id, -1, -1);
 
-	return (value != null)? value - 1 : null
-}
+	return (value != null)? value - 1 : null;
+};
 
 const generate_table = (): string => {
 	let [table, row] = ["", ""];
@@ -84,18 +84,18 @@ const generate_table = (): string => {
         row = "";
 	}
 	return `<table><tbody>${table}</tbody>\n</table>`;
-}
+};
 
 const receive_data = (req: http.IncomingMessage, callback: (data: string) => void) => {
-	console.log("receive")
+	console.log("receive");
     let data = "";
     req.on("data", (chunk: string) => {
         data += chunk.toString();
     });
     req.on("end", () => {
-        callback(data)
+        callback(data);
     });
-}
+};
 
 const game =
 	`<!DOCTYPE html><meta charset="UTF-8"><script type="module">${fs.readFileSync("lib/cell_update.js")}</script>` +
@@ -110,32 +110,32 @@ const server = http.createServer((req, res) => {
                 receive_data(req, (data) => {
                     console.log("POST data:", data);
                     res.end("Data received");
-                    let ids = data.split(" ");
-					let button_id = Number(ids[0])
-					let player_id = Number(ids[1])
+                	const ids = data.split(" ");
+					const button_id = Number(ids[0]);
+					const player_id = Number(ids[1]);
                     if (button_id < 400 && !table.has(button_id) && current_move == player_id && ids[2] == (passwords.get(player_id) as string)) {
                         table.set(button_id, player_id);
-						sync_data = SyncData.NormalData
-						current_button_id = button_id
+						sync_data = SyncData.NormalData;
+						current_button_id = button_id;
 						last_move = current_move;
 						if (current_move == Player.First) {
-							current_move = Player.Second
+							current_move = Player.Second;
 						} else {
-							current_move = Player.First
+							current_move = Player.First;
 						}
 
-                        let player_win = is_win(button_id);
+                        const player_win = is_win(button_id);
                         if (player_win != null) {
-							console.log(`Player ${player_win} is win!`)
+							console.log(`Player ${player_win} is win!`);
 							setTimeout(() => {
 								sync_data = SyncData.GameEnd;
 								current_move = player_win;
-							}, 300)
+							}, 300);
                         }
                     } else {
                         console.log(`intresting connection: ${req.socket.remoteAddress}`);
                     }
-                })
+                });
 				break;
 			}
 			case "/cell_sync": {
@@ -148,19 +148,19 @@ const server = http.createServer((req, res) => {
 				randomBytes(15, (err, buf) => {
 					if (err) throw err;
 					if (!server_full) {
-						let password = buf.toString("hex");
+						const password = buf.toString("hex");
 						passwords.set(player, password);
 						res.writeHead(200, { "Content-Type": "text/html" });
 						res.end(game.replace("'constant_player_id'", player.toString()).replace("'password'", `"${password}"`));
 						if (player == Player.First) {
-							player = Player.Second
+							player = Player.Second;
 						} else {
-							console.log("Server full!")
-							server_full = true
+							console.log("Server full!");
+							server_full = true;
 						}
 					} else {
 						res.writeHead(200, { "Content-Type": "text/plain" });
-						res.end("Люди уже играют")
+						res.end("Люди уже играют");
 					}
 				});
 				break;
@@ -168,7 +168,7 @@ const server = http.createServer((req, res) => {
 
 			case "/enums": {
 				res.writeHead(200, { "Content-Type": "text/javascript" });
-				res.end(fs.readFileSync("lib/enums.js"))
+				res.end(fs.readFileSync("lib/enums.js"));
 				break;
 			}
 		}
