@@ -1,11 +1,11 @@
 export const enum Player {
-	First,
-	Second
+  First,
+  Second
 }
 
 
 export const enum SyncData {
-	NormalData,
-	GameStart,
-	GameEnd
+  NormalData,
+  GameStart,
+  GameEnd
 }
